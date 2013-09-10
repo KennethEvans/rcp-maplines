@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="net.kenevans.maplines.plugin.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="Perspective"
+            class="net.kenevans.maplines.plugin.Perspective"
+            id="net.kenevans.maplines.perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="MapLinesView"
+            class="net.kenevans.maplines.views.MapLinesView"
+            id="net.kenevans.maplines.view">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="*">
+         <view
+               standalone="true"
+               minimized="false"
+               relative="org.eclipse.ui.editorss"
+               relationship="left"
+               id="net.kenevans.maplines.view">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               label="File">
+            <command
+                  commandId="net.kenevans.maplines.openimage"
+                  label="Open Image..."
+                  style="push">
+            </command>
+            <command
+                  commandId="net.kenevans.maplines.openlines"
+                  label="Open Lines..."
+                  style="push">
+            </command>
+            <command
+                  commandId="net.kenevans.maplines.opencalibration"
+                  label="Open Calibration..."
+                  style="push">
+            </command>
+            <separator
+                  name="separator"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="net.kenevans.maplines.savelines"
+                  label="Save Lines..."
+                  style="push">
+            </command>
+            <command
+                  commandId="net.kenevans.maplines.savegpx"
+                  label="Save GPX..."
+                  style="push">
+            </command>
+            <separator
+                  name="separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.eclipse.ui.file.exit"
+                  label="Exit">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:net.kenevans.maplines.view?after=additions">
+         <separator
+               name="separator2"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.maplines.startline"
+               label="Start Line"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.maplines.endline"
+               label="End Line"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.maplines.deletecurrentline"
+               label="Delete Current Line"
+               style="push">
+         </command>
+         <separator
+               name="separator3"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.maplines.clearlines"
+               label="Clear Lines"
+               style="push">
+         </command>
+         <separator
+               name="additions"
+               visible="true">
+         </separator>
+      </menuContribution>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="net.kenevans.maplines.application"
+            name="Map Lines">
+         <property
+               name="windowImages"
+               value="icons/alt_window_16.gif,icons/alt_window_32.gif">
+         </property>
+         <property
+               name="appName"
+               value="Map Lines">
+         </property>
+      </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="net.kenevans.maplines.category"
+            name="Map Lines Category">
+      </category>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.openimage"
+            name="Open Image...">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.opencalibration"
+            name="Open Calibration...">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.openlines"
+            name="Open Lines...">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.savelines"
+            name="Save Lines...">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.savegpx"
+            name="Save GPX...">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.startline"
+            name="Start Line">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.endline"
+            name="End Line">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.clearlines"
+            name="Clear Lines">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.deletecurrentline"
+            name="Delete Current Line">
+      </command>
+   </extension>
+
+</plugin>
