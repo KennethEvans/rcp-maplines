@@ -1,13 +1,19 @@
 package net.kenevans.maplines.ui;
 
+import java.util.List;
+
 import net.kenevans.core.utils.SWTUtils;
 import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
+import net.kenevans.maplines.lines.MapCalibration;
+import net.kenevans.maplines.lines.MapCalibration.MapData;
+import net.kenevans.maplines.views.MapLinesView;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -39,11 +45,13 @@ public class SWTImageViewerControl extends Composite
 
     private Lines lines;
     private Line curLine;
+    private MapLinesView view;
 
-    public SWTImageViewerControl(Composite parent, int style) {
+    public SWTImageViewerControl(Composite parent, int style, MapLinesView view) {
         super(parent, style);
         shell = parent.getShell();
         display = shell.getDisplay();
+        this.view = view;
 
         GridLayout layout = new GridLayout();
         layout.numColumns = 1;
@@ -126,28 +134,51 @@ public class SWTImageViewerControl extends Composite
                 }
 
                 // Draw the lines
-                if(lines == null || lines.getNLines() == 0) {
-                    return;
-                }
-                boolean first;
-                Point prev = null;
-                for(Line line : lines.getLines()) {
-                    gc.setForeground(line.getColor());
-                    if(line.getNPoints() < 1) {
-                        continue;
-                    }
-                    first = true;
-                    for(Point point : line.getPoints()) {
-                        if(first) {
-                            first = false;
-                            prev = point;
-                        } else {
-                            // Only the image scrolls. Have to add origin to get
-                            // the right coordinates.
-                            gc.drawLine(origin.x + prev.x, origin.y + prev.y,
-                                origin.x + point.x, origin.y + point.y);
-                            prev = point;
+                if(lines != null || lines.getNLines() > 0) {
+                    boolean first;
+                    Point prev = null;
+                    for(Line line : lines.getLines()) {
+                        gc.setForeground(line.getColor());
+                        if(line.getNPoints() < 1) {
+                            continue;
                         }
+                        first = true;
+                        for(Point point : line.getPoints()) {
+                            if(first) {
+                                first = false;
+                                prev = point;
+                            } else {
+                                // Only the image scrolls. Have to add origin to
+                                // get
+                                // the right coordinates.
+                                gc.drawLine(origin.x + prev.x, origin.y
+                                    + prev.y, origin.x + point.x, origin.y
+                                    + point.y);
+                                prev = point;
+                            }
+                        }
+                    }
+                }
+
+                // Draw the calibration points
+                MapCalibration mapCalibration = null;
+                List<MapData> dataList = null;
+                if(SWTImageViewerControl.this.view != null) {
+                    mapCalibration = SWTImageViewerControl.this.view
+                        .getMapCalibration();
+                    if(mapCalibration != null) {
+                        dataList = mapCalibration.getDataList();
+                    }
+                }
+                if(dataList != null && dataList.size() > 0) {
+                    gc.setForeground(display.getSystemColor(SWT.COLOR_BLUE));
+                    int x, y;
+                    int len = 10;
+                    for(MapData data : dataList) {
+                        x = origin.x + data.getX();
+                        y = origin.y + data.getY();
+                        gc.drawLine(x + len, y, x - len, y);
+                        gc.drawLine(x, y + len, x, y - len);
                     }
                 }
             }
@@ -269,7 +300,7 @@ public class SWTImageViewerControl extends Composite
         // SWT.DEFAULT gives scroll bars in addition to those on the Control
         // SWT.NONE does not
         SWTImageViewerControl control = new SWTImageViewerControl(shell,
-            SWT.NONE);
+            SWT.NONE, null);
         Image image = null;
         if(useStartImage) {
             try {

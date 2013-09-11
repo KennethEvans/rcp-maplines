@@ -96,7 +96,7 @@ public class MapCalibration
             Matrix u = svd.getU();
             Matrix v = svd.getV();
             Matrix wi = svd.getS();
-            for(int i = 0; i < nPoints2; i++) {
+            for(int i = 0; i < 6; i++) {
                 wi.set(i, i, 1. / wi.get(i, i));
             }
             Matrix aainv = v.times(wi).times(u.transpose());
@@ -268,6 +268,15 @@ public class MapCalibration
     public MapTransform getTransform() {
         return transform;
     }
+    
+    /**
+     * @return The value of dataList.
+     */
+    public List<MapData> getDataList() {
+        return dataList;
+    }
+
+
 
     public class MapTransform
     {

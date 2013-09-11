@@ -40,7 +40,9 @@ public class MapLinesView extends ViewPart
     public static final boolean useStartImage = true;
     // public static final String startImageName =
     // "C:/users/evans/Pictures/DAZ.Dogfight.15017.jpg";
-    public static final String startImageName = "C:/Scratch/Wisconsin RR/BoulderJunction-Cabin.jpg";
+    // public static final String startImageName =
+    // "C:/Scratch/Wisconsin RR/BoulderJunction-Cabin.jpg";
+    public static final String startImageName = "C:/Scratch/Wisconsin RR/Boulder_Junction.jpg";
 
     private Display display;
     private Shell shell;
@@ -111,7 +113,7 @@ public class MapLinesView extends ViewPart
 
         // SWT.DEFAULT gives scroll bars in addition to those on the Control
         // SWT.NONE does not
-        viewer = new SWTImageViewerControl(parent, SWT.NONE);
+        viewer = new SWTImageViewerControl(parent, SWT.NONE, this);
         lines = new Lines();
         viewer.setLines(lines);
         // Line line = new Line();
@@ -186,6 +188,7 @@ public class MapLinesView extends ViewPart
             try {
                 mapCalibration = new MapCalibration();
                 mapCalibration.read(new File(fileName));
+                viewer.getCanvas().redraw();
             } catch(Exception ex) {
                 SWTUtils.excMsg("Failed to read calibration file", ex);
                 mapCalibration = null;
@@ -524,6 +527,13 @@ public class MapLinesView extends ViewPart
         // System.out.println("endLine");
         // System.out.println("curLine=" + viewer.getCurLine());
         // System.out.println(lines.info());
+    }
+
+    /**
+     * @return The value of mapCalibration.
+     */
+    public MapCalibration getMapCalibration() {
+        return mapCalibration;
     }
 
 }
