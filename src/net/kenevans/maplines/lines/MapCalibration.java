@@ -25,9 +25,7 @@ public class MapCalibration
         double lon, lat;
         in = new BufferedReader(new FileReader(file));
         String line;
-        int lineNum = 0;
         while((line = in.readLine()) != null) {
-            lineNum++;
             tokens = line.trim().split("\\s+");
             // Skip blank lines
             if(tokens.length == 0) {
@@ -37,19 +35,14 @@ public class MapCalibration
             if(tokens[0].trim().startsWith("#")) {
                 continue;
             }
-            // Must be 4 or more values, any after 4 are ignored
-            if(tokens.length < 4) {
-                SWTUtils.errMsg("Invalid Calibration file at line " + lineNum);
-                in.close();
-                return false;
-            }
             x = Integer.parseInt(tokens[0]);
             y = Integer.parseInt(tokens[1]);
             lon = Double.parseDouble(tokens[2]);
             lat = Double.parseDouble(tokens[3]);
             // DEBUG
-            System.out.println(String.format("x=%d y=%d lon=%.6f lat=%.6f", x,
-                y, lon, lat));
+            // System.out.println(String.format("x=%d y=%d lon=%.6f lat=%.6f",
+            // x,
+            // y, lon, lat));
             data = new MapData(x, y, lon, lat);
             dataList.add(data);
         }
@@ -218,8 +211,8 @@ public class MapCalibration
         val[0] = transform.getA() * x + transform.getB() * y + transform.getE();
         val[1] = transform.getC() * x + transform.getD() * y + transform.getF();
         // DEBUG
-        System.out.println(String.format("x=%d y=%d lon=%.6f lat=%.6f", x, y,
-            val[0], val[1]));
+        // System.out.println(String.format("x=%d y=%d lon=%.6f lat=%.6f", x, y,
+        // val[0], val[1]));
         return val;
     }
 
@@ -268,15 +261,13 @@ public class MapCalibration
     public MapTransform getTransform() {
         return transform;
     }
-    
+
     /**
      * @return The value of dataList.
      */
     public List<MapData> getDataList() {
         return dataList;
     }
-
-
 
     public class MapTransform
     {

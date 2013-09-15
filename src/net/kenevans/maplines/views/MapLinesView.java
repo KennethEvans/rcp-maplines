@@ -42,7 +42,7 @@ public class MapLinesView extends ViewPart
     // "C:/users/evans/Pictures/DAZ.Dogfight.15017.jpg";
     // public static final String startImageName =
     // "C:/Scratch/Wisconsin RR/BoulderJunction-Cabin.jpg";
-    public static final String startImageName = "C:/Scratch/Wisconsin RR/Boulder_Junction.jpg";
+    public static final String startImageName = "C:/Scratch/Wisconsin RR/Boulder Junction.jpg";
 
     private Display display;
     private Shell shell;
