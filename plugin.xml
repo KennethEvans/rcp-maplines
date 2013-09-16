@@ -112,6 +112,11 @@
                visible="true">
          </separator>
          <command
+               commandId="net.kenevans.maplines.calibrationlines"
+               label="Calibration Lines"
+               style="push">
+         </command>
+         <command
                commandId="net.kenevans.maplines.clearlines"
                label="Clear Lines"
                style="push">
@@ -188,6 +193,11 @@
             categoryId="net.kenevans.maplines.category"
             id="net.kenevans.maplines.deletecurrentline"
             name="Delete Current Line">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.calibrationlines"
+            name="Calibration Lines">
       </command>
    </extension>
 

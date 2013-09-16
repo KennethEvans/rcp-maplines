@@ -18,7 +18,7 @@ import org.eclipse.swt.graphics.Point;
 
 public class GPXUtils
 {
-    public static void writeGPXFile(String fileName,
+    public static void writeGPXFile(String fileName, String trackName,
         MapCalibration mapCalibration, Lines lines) {
         File file = new File(fileName);
         boolean doIt = true;
@@ -46,7 +46,8 @@ public class GPXUtils
 
                 // Write metadata
                 out.println("  <metadata>");
-                out.println(String.format("    <time>%s</time>", timeString(date)));
+                out.println(String.format("    <time>%s</time>",
+                    timeString(date)));
                 out.println("  </metadata>");
 
                 // Write lines
@@ -54,7 +55,7 @@ public class GPXUtils
                     Line line;
                     Point point;
                     out.println("  <trk>");
-                    out.println("    <name>Map Lines</name>");
+                    out.println("    <name>" + trackName + "</name>");
                     out.println("    <extensions>");
                     out.println("      <gpxx:TrackExtension xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\">");
                     out.println("        <gpxx:DisplayColor>Blue</gpxx:DisplayColor>");
@@ -71,8 +72,8 @@ public class GPXUtils
                                 "      <trkpt lat=\"%f\" lon=\"%f\">", vals[1],
                                 vals[0]));
                             out.println("        <ele>0.0</ele>");
-                            out.println(String.format("        <time>%s</time>",
-                                timeString(date)));
+                            out.println(String.format(
+                                "        <time>%s</time>", timeString(date)));
                             out.println("      </trkpt>");
                         }
                         out.println("    </trkseg>");

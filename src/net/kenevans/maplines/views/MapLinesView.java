@@ -3,10 +3,12 @@ package net.kenevans.maplines.views;
 import java.io.File;
 
 import net.kenevans.core.utils.SWTUtils;
+import net.kenevans.core.utils.Utils;
 import net.kenevans.maplines.lines.GPXUtils;
 import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
 import net.kenevans.maplines.lines.MapCalibration;
+import net.kenevans.maplines.lines.MapCalibration.MapData;
 import net.kenevans.maplines.ui.SWTImageViewerControl;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -22,6 +24,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -54,6 +57,7 @@ public class MapLinesView extends ViewPart
     protected Lines lines;
 
     protected MapCalibration mapCalibration;
+    protected String imageFileName;
 
     protected static int nextLineNumber = 1;
 
@@ -292,7 +296,28 @@ public class MapLinesView extends ViewPart
             if(index > 0) {
                 initialDataPath = selectedPath.substring(0, index);
             }
-            GPXUtils.writeGPXFile(fileName, mapCalibration, lines);
+            String trackName = "Map Lines";
+            if(imageFileName != null) {
+                File file = new File(imageFileName);
+                trackName = file.getName();
+                int i = trackName.lastIndexOf('.');
+                if(i > 0) {
+                    trackName = trackName.substring(0, i);
+                }
+            }
+            // Prompt for the track name
+            InputDialog descDlg = new InputDialog(null, "Description",
+                "Enter a track name:", trackName, null);
+            descDlg.setBlockOnOpen(true);
+            int res = descDlg.open();
+            if(res == Dialog.OK) {
+                String val = descDlg.getValue();
+                if(val != null) {
+                    trackName = val;
+                }
+            }
+
+            GPXUtils.writeGPXFile(fileName, trackName, mapCalibration, lines);
         }
     }
 
@@ -305,6 +330,7 @@ public class MapLinesView extends ViewPart
         try {
             Image newImage = new Image(display, fileName);
             shell.setText(fileName);
+            imageFileName = fileName;
             viewer.setImage(newImage);
         } catch(RuntimeException ex) {
             SWTUtils.excMsgAsync(shell, "Cannot load image from:\n" + fileName,
@@ -405,6 +431,17 @@ public class MapLinesView extends ViewPart
         id = "net.kenevans.maplines.clearlines";
         handlerService.activateHandler(id, handler);
 
+        // Calibration Lines
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                calibrationLines();
+                return null;
+            }
+        };
+        id = "net.kenevans.maplines.calibrationlines";
+        handlerService.activateHandler(id, handler);
+
         // Delete Current Line
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
@@ -493,6 +530,47 @@ public class MapLinesView extends ViewPart
         // System.out.println("endLine");
         // System.out.println("curLine=" + viewer.getCurLine());
         // System.out.println(lines.info());
+    }
+
+    /**
+     * Makes lines corresponding to the calibration points.
+     */
+    public void calibrationLines() {
+        if(lines == null || viewer == null) {
+            return;
+        }
+        if(mapCalibration == null) {
+            SWTUtils.errMsg("Calibration is not available");
+            return;
+        }
+        if(mapCalibration.getTransform() == null) {
+            SWTUtils.errMsg("Calibration is not valid");
+            return;
+        }
+        Line line = new Line();
+        lines.addLine(line);
+        viewer.setCurLine(line);
+        for(MapData data : mapCalibration.getDataList()) {
+            line.addPoint(new Point(data.getX(), data.getY()));
+        }
+        if(mapCalibration.getDataList().size() > 1) {
+            MapData data = mapCalibration.getDataList().get(0);
+            line.addPoint(new Point(data.getX(), data.getY()));
+        }
+        viewer.getCanvas().redraw();
+
+        // Prompt for the description
+        InputDialog dlg = new InputDialog(null, "Description",
+            "Enter a description:", "Calibration Lines", null);
+        dlg.setBlockOnOpen(true);
+        int res = dlg.open();
+        if(res == Dialog.OK) {
+            String val = dlg.getValue();
+            if(val != null) {
+                line.setDesc(val);
+                nextLineNumber++;
+            }
+        }
     }
 
     /**
