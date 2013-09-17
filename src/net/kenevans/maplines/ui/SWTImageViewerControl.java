@@ -35,6 +35,9 @@ public class SWTImageViewerControl extends Composite
     private static final String startImageName = "C:/users/evans/Pictures/DAZ.Dogfight.15017.jpg";
     // private static final String startImageName =
     // "C:/Documents and Settings/evans/My Documents/My Pictures/ChromaticityDiagram.png";
+
+    private static final int LINE_WIDTH = 3;
+    
     private Display display;
     private Shell shell;
     private Canvas canvas;
@@ -135,6 +138,7 @@ public class SWTImageViewerControl extends Composite
 
                 // Draw the lines
                 if(lines != null || lines.getNLines() > 0) {
+                    gc.setLineWidth(LINE_WIDTH);
                     boolean first;
                     Point prev = null;
                     for(Line line : lines.getLines()) {
@@ -172,6 +176,7 @@ public class SWTImageViewerControl extends Composite
                 }
                 if(dataList != null && dataList.size() > 0) {
                     gc.setForeground(display.getSystemColor(SWT.COLOR_BLUE));
+                    gc.setLineWidth(1);
                     int x, y;
                     int len = 10;
                     for(MapData data : dataList) {
