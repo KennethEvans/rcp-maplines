@@ -3,7 +3,6 @@ package net.kenevans.maplines.views;
 import java.io.File;
 
 import net.kenevans.core.utils.SWTUtils;
-import net.kenevans.core.utils.Utils;
 import net.kenevans.maplines.lines.GPXUtils;
 import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
