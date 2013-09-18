@@ -135,7 +135,7 @@
             name="Map Lines">
          <property
                name="windowImages"
-               value="icons/alt_window_16.gif,icons/alt_window_32.gif">
+               value="icons/MapLines16.png,icons/MapLines32.png">
          </property>
          <property
                name="appName"

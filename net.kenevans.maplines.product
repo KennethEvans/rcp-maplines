@@ -3,21 +3,26 @@
 
 <product name="Map Lines" id="net.kenevans.maplines.product" application="net.kenevans.maplines.application" version="1.0.0.Beta1" useFeatures="false" includeLaunchers="true">
 
+
    <configIni use="default">
    </configIni>
 
    <launcherArgs>
+      <vmArgs>-Xms40m -Xmx256m</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
-   <windowImages i16="icons/alt_window_16.gif" i32="icons/alt_window_32.gif"/>
+   <windowImages i16="icons/MapLines16.png" i32="icons/MapLines32.png"/>
 
-   <launcher>
+
+   <launcher name="MapLines">
       <solaris/>
-      <win useIco="false">
+      <win useIco="true">
+         <ico path="icons/MapLines.ico"/>
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
