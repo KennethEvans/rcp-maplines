@@ -165,7 +165,9 @@ public class EditLinesDialog extends Dialog
         composite.setLayout(gridLayout);
 
         list = new List(composite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
-        GridDataFactory.fillDefaults().grab(true, false).applyTo(list);
+        // Limit the vertical height or it will go off screen
+        GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 400)
+            .applyTo(list);
         list.addSelectionListener(new SelectionListener() {
             public void widgetSelected(SelectionEvent event) {
                 int[] selections = list.getSelectionIndices();
@@ -217,7 +219,7 @@ public class EditLinesDialog extends Dialog
         gridLayout = new GridLayout();
         gridLayout.marginHeight = 0;
         gridLayout.marginWidth = 0;
-        gridLayout.numColumns = 7; // Set equal to number of buttons
+        gridLayout.numColumns = 8; // Set equal to number of buttons
         composite.setLayout(gridLayout);
 
         Button button;
@@ -420,6 +422,33 @@ public class EditLinesDialog extends Dialog
                     line.setSelected(true);
                 }
                 list.setSelection(indices);
+                view.getViewer().getCanvas().redraw();
+            }
+        });
+
+        button = new Button(composite, SWT.PUSH);
+        button.setText("Number");
+        button.setToolTipText("Number all lines consecutively.");
+        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
+            .grab(true, true).applyTo(button);
+        button.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                if(lines == null) {
+                    return;
+                }
+                int[] indices = list.getSelectionIndices();
+                int n = 1;
+                for(Line line : lines.getLines()) {
+                    line.setDesc("Line " + n++);
+                }
+                resetList();
+                // Reset what was selected
+                list.setSelection(indices);
+                Line line;
+                for(int i : indices) {
+                    line = lines.getLines().get(i);
+                    line.setSelected(true);
+                }
                 view.getViewer().getCanvas().redraw();
             }
         });

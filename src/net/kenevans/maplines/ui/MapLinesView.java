@@ -523,18 +523,19 @@ public class MapLinesView extends ViewPart
         Line line = new Line();
         lines.addLine(line);
         viewer.setCurLine(line);
-        // Prompt for the description
-        InputDialog dlg = new InputDialog(null, "Description",
-            "Enter a description:", "Line " + nextLineNumber, null);
-        dlg.setBlockOnOpen(true);
-        int res = dlg.open();
-        if(res == Dialog.OK) {
-            String val = dlg.getValue();
-            if(val != null) {
-                line.setDesc(val);
-                nextLineNumber++;
-            }
-        }
+        line.setDesc("Line " + nextLineNumber++);
+        // // Prompt for the description
+        // InputDialog dlg = new InputDialog(null, "Description",
+        // "Enter a description:", "Line " + nextLineNumber, null);
+        // dlg.setBlockOnOpen(true);
+        // int res = dlg.open();
+        // if(res == Dialog.OK) {
+        // String val = dlg.getValue();
+        // if(val != null) {
+        // line.setDesc(val);
+        // nextLineNumber++;
+        // }
+        // }
 
         // // DEBUG
         // System.out.println("startLine");
