@@ -1,5 +1,10 @@
 package net.kenevans.maplines.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
+import net.kenevans.core.utils.SWTUtils;
 import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
 
@@ -13,8 +18,10 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -210,7 +217,7 @@ public class EditLinesDialog extends Dialog
         gridLayout = new GridLayout();
         gridLayout.marginHeight = 0;
         gridLayout.marginWidth = 0;
-        gridLayout.numColumns = 5; // Equal to number of buttons
+        gridLayout.numColumns = 7; // Set equal to number of buttons
         composite.setLayout(gridLayout);
 
         Button button;
@@ -228,8 +235,12 @@ public class EditLinesDialog extends Dialog
                     return;
                 }
                 int[] indices = list.getSelectionIndices();
-                for(int i : indices) {
-                    lines.removeLine(i);
+                // Order is not guaranteed
+                Arrays.sort(indices);
+                int len = indices.length;
+                // Remove them in reverse order to preserve the correct indices
+                for(int i = 0; i < len; i++) {
+                    lines.removeLine(indices[len - 1 - i]);
                 }
                 resetList();
                 view.getViewer().getCanvas().redraw();
@@ -291,49 +302,125 @@ public class EditLinesDialog extends Dialog
                 if(lines == null) {
                     return;
                 }
+                int[] indices = list.getSelectionIndices();
 
-                ListDialog dialog = new ListDialog(shell);
-                dialog.setTitle("Color");
-                dialog.setMessage("Set the line color");
-                dialog.setContentProvider(new ArrayContentProvider());
-                dialog.setLabelProvider(new LabelProvider());
-                // This will be overwritten by the buttons if it is too small
-                dialog.setWidthInChars(12);
-
-                // Define an array of color values and a coordinated list of
-                // color names
-                int colors[] = {SWT.COLOR_RED, SWT.COLOR_GREEN, SWT.COLOR_BLUE,
-                    SWT.COLOR_MAGENTA, SWT.COLOR_CYAN, SWT.COLOR_YELLOW,
-                    SWT.COLOR_GRAY, SWT.COLOR_BLACK, SWT.COLOR_WHITE,
-                    SWT.COLOR_DARK_RED, SWT.COLOR_DARK_GREEN,
-                    SWT.COLOR_DARK_BLUE, SWT.COLOR_DARK_MAGENTA,
-                    SWT.COLOR_DARK_CYAN, SWT.COLOR_DARK_YELLOW,
-                    SWT.COLOR_DARK_GRAY,};
-                String colorNames[] = {"Red", "Green", "Blue", "Magenta",
-                    "Cyan", "Yellow", "Gray", "Black", "White", "Dark Red",
-                    "Dark Green", "Dark Blue", "Dark Magenta", "Dark Cyan",
-                    "Dark Yellow", "Dark Gray",};
-                dialog.setInput(colorNames);
-                if(dialog.open() == Window.OK) {
-                    Object[] result = dialog.getResult();
-                    // Use the first value
-                    if(result.length > 0) {
-                        String colorName = (String)result[0];
-                        Line line;
-                        for(int i = 0; i < colorNames.length; i++) {
-                            // Look for the matching color value
-                            if(colorName.equals(colorNames[i])) {
-                                // Change all the selected lines
-                                int[] indices = list.getSelectionIndices();
-                                for(int j : indices) {
-                                    line = lines.getLines().get(j);
-                                    line.setColor(colors[i]);
-                                }
-                            }
-                        }
-                        view.getViewer().getCanvas().redraw();
+                ColorDialog dialog = new ColorDialog(shell);
+                dialog.setText("Line Color");
+                Line line = lines.getLines().get(indices[0]);
+                RGB defaultRgb = line.getRgb();
+                dialog.setRGB(defaultRgb);
+                RGB newColor = dialog.open();
+                if(newColor != null) {
+                    for(int i : indices) {
+                        line = lines.getLines().get(i);
+                        line.setRgb(newColor);
                     }
                 }
+                view.getViewer().getCanvas().redraw();
+            }
+        });
+
+        button = new Button(composite, SWT.PUSH);
+        button.setText("Up");
+        button.setToolTipText("Move selected lines up.");
+        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
+            .grab(true, true).applyTo(button);
+        button.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                if(list == null || list.getSelectionCount() == 0) {
+                    return;
+                }
+                if(lines == null) {
+                    return;
+                }
+                int[] indices = list.getSelectionIndices();
+                // Order is not guaranteed
+                Arrays.sort(indices);
+                int len = indices.length;
+                int minIndex = indices[0];
+                if(minIndex == 0) {
+                    SWTUtils.errMsg("Already at the top");
+                    return;
+                }
+                ArrayList<Line> movedLines = new ArrayList<Line>(len);
+                // Remove them in reverse order to preserve the correct indices
+                int idx;
+                for(int i = 0; i < len; i++) {
+                    idx = indices[len - 1 - i];
+                    movedLines.add(0, lines.getLines().get(idx));
+                    lines.removeLine(idx);
+                }
+                lines.getLines().addAll(minIndex - 1, movedLines);
+                movedLines.clear();
+                // Find the selected ones
+                idx = 0;
+                Line line;
+                for(int i = 0; i < lines.getNLines(); i++) {
+                    line = lines.getLines().get(i);
+                    if(line.isSelected() && idx < len) {
+                        indices[idx++] = i;
+                    }
+                }
+                resetList();
+                // Reselect the moved ones
+                for(int i = 0; i < len; i++) {
+                    line = lines.getLines().get(indices[i]);
+                    line.setSelected(true);
+                }
+                list.setSelection(indices);
+                view.getViewer().getCanvas().redraw();
+            }
+        });
+
+        button = new Button(composite, SWT.PUSH);
+        button.setText("Down");
+        button.setToolTipText("Move selected lines down.");
+        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
+            .grab(true, true).applyTo(button);
+        button.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                if(list == null || list.getSelectionCount() == 0) {
+                    return;
+                }
+                if(lines == null) {
+                    return;
+                }
+                int[] indices = list.getSelectionIndices();
+                // Order is not guaranteed
+                Arrays.sort(indices);
+                int len = indices.length;
+                int maxIndex = indices[len - 1];
+                if(maxIndex == lines.getNLines() - 1) {
+                    SWTUtils.errMsg("Already at the bottom");
+                    return;
+                }
+                ArrayList<Line> movedLines = new ArrayList<Line>(len);
+                // Remove them in reverse order to preserve the correct indices
+                int idx;
+                for(int i = 0; i < len; i++) {
+                    idx = indices[len - 1 - i];
+                    movedLines.add(0, lines.getLines().get(idx));
+                    lines.removeLine(idx);
+                }
+                lines.getLines().addAll(maxIndex + 1, movedLines);
+                movedLines.clear();
+                // Find the selected ones
+                idx = 0;
+                Line line;
+                for(int i = 0; i < lines.getNLines(); i++) {
+                    line = lines.getLines().get(i);
+                    if(line.isSelected() && idx < len) {
+                        indices[idx++] = i;
+                    }
+                }
+                resetList();
+                // Reselect the moved ones
+                for(int i = 0; i < len; i++) {
+                    line = lines.getLines().get(indices[i]);
+                    line.setSelected(true);
+                }
+                list.setSelection(indices);
+                view.getViewer().getCanvas().redraw();
             }
         });
 

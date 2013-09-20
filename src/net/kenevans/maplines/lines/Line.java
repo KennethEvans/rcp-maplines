@@ -5,8 +5,8 @@ import java.util.List;
 
 import net.kenevans.core.utils.SWTUtils;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 
 /*
  * Created on Aug 17, 2013
@@ -15,7 +15,8 @@ import org.eclipse.swt.graphics.Point;
 
 public class Line
 {
-    private int color = SWT.COLOR_RED;
+    public static final RGB DEFAULT_LINE_COLOR = new RGB(255, 0, 0);
+    private RGB rgb = DEFAULT_LINE_COLOR;
     private List<Point> points = new ArrayList<Point>();
     private String desc = "";
     private boolean selected = false;
@@ -38,8 +39,8 @@ public class Line
         // Do nothing
     }
 
-    public Line(int color) {
-        this.color = color;
+    public Line(RGB color) {
+        this.rgb = color;
     }
 
     public void addPoint(Point point) {
@@ -65,17 +66,17 @@ public class Line
     }
 
     /**
-     * @return The value of color.
+     * @return The value of rgb.
      */
-    public int getColor() {
-        return color;
+    public RGB getRgb() {
+        return rgb;
     }
 
     /**
-     * @param color The new value for color.
+     * @param rgb The new value for rgb.
      */
-    public void setColor(int color) {
-        this.color = color;
+    public void setRgb(RGB rgb) {
+        this.rgb = rgb;
     }
 
     /**

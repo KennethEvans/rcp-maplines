@@ -12,6 +12,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -143,8 +144,9 @@ public class SWTImageViewerControl extends Composite
                         if(line.getNPoints() < 1) {
                             continue;
                         }
-                        gc.setForeground(Display.getCurrent().getSystemColor(
-                            line.getColor()));
+                        Color color = new Color(Display.getCurrent(), line
+                            .getRgb());
+                        gc.setForeground(color);
                         if(line.isSelected()) {
                             gc.setLineWidth(SELECTED_LINE_WIDTH);
                         } else {
@@ -165,6 +167,7 @@ public class SWTImageViewerControl extends Composite
                                 prev = point;
                             }
                         }
+                        color.dispose();
                     }
                 }
 
