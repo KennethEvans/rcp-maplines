@@ -7,7 +7,6 @@ import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
 import net.kenevans.maplines.lines.MapCalibration;
 import net.kenevans.maplines.lines.MapCalibration.MapData;
-import net.kenevans.maplines.views.MapLinesView;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
@@ -36,7 +35,8 @@ public class SWTImageViewerControl extends Composite
     // "C:/Documents and Settings/evans/My Documents/My Pictures/ChromaticityDiagram.png";
 
     private static final int LINE_WIDTH = 3;
-    
+    private static final int SELECTED_LINE_WIDTH = 5;
+
     private Display display;
     private Shell shell;
     private Canvas canvas;
@@ -137,13 +137,18 @@ public class SWTImageViewerControl extends Composite
 
                 // Draw the lines
                 if(lines != null || lines.getNLines() > 0) {
-                    gc.setLineWidth(LINE_WIDTH);
                     boolean first;
                     Point prev = null;
                     for(Line line : lines.getLines()) {
-                        gc.setForeground(line.getColor());
                         if(line.getNPoints() < 1) {
                             continue;
+                        }
+                        gc.setForeground(Display.getCurrent().getSystemColor(
+                            line.getColor()));
+                        if(line.isSelected()) {
+                            gc.setLineWidth(SELECTED_LINE_WIDTH);
+                        } else {
+                            gc.setLineWidth(LINE_WIDTH);
                         }
                         first = true;
                         for(Point point : line.getPoints()) {

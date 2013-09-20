@@ -23,7 +23,7 @@
          point="org.eclipse.ui.views">
       <view
             name="MapLinesView"
-            class="net.kenevans.maplines.views.MapLinesView"
+            class="net.kenevans.maplines.ui.MapLinesView"
             id="net.kenevans.maplines.view">
       </view>
    </extension>
@@ -82,6 +82,14 @@
             <command
                   commandId="org.eclipse.ui.file.exit"
                   label="Exit">
+            </command>
+         </menu>
+         <menu
+               label="Edit">
+            <command
+                  commandId="net.kenevans.maplines.editlines"
+                  label="Edit Lines..."
+                  style="push">
             </command>
          </menu>
       </menuContribution>
@@ -198,6 +206,11 @@
             categoryId="net.kenevans.maplines.category"
             id="net.kenevans.maplines.calibrationlines"
             name="Calibration Lines">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.editlines"
+            name="Edit Lines...">
       </command>
    </extension>
 

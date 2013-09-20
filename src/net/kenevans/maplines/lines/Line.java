@@ -5,9 +5,8 @@ import java.util.List;
 
 import net.kenevans.core.utils.SWTUtils;
 
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
 
 /*
  * Created on Aug 17, 2013
@@ -16,9 +15,10 @@ import org.eclipse.swt.widgets.Display;
 
 public class Line
 {
-    private Color color = new Color(Display.getCurrent(), 255, 0, 0);
+    private int color = SWT.COLOR_RED;
     private List<Point> points = new ArrayList<Point>();
     private String desc = "";
+    private boolean selected = false;
 
     public Line(int[][] data) {
         if(data == null || data.length == 0) {
@@ -38,7 +38,7 @@ public class Line
         // Do nothing
     }
 
-    public Line(Color color) {
+    public Line(int color) {
         this.color = color;
     }
 
@@ -67,14 +67,14 @@ public class Line
     /**
      * @return The value of color.
      */
-    public Color getColor() {
+    public int getColor() {
         return color;
     }
 
     /**
      * @param color The new value for color.
      */
-    public void setColor(Color color) {
+    public void setColor(int color) {
         this.color = color;
     }
 
@@ -104,6 +104,20 @@ public class Line
      */
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    /**
+     * @return The value of selected.
+     */
+    public boolean isSelected() {
+        return selected;
+    }
+
+    /**
+     * @param selected The new value for selected.
+     */
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
 }

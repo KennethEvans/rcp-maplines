@@ -1,7 +1,7 @@
 package net.kenevans.maplines.handlers;
 
 import net.kenevans.core.utils.SWTUtils;
-import net.kenevans.maplines.views.MapLinesView;
+import net.kenevans.maplines.ui.MapLinesView;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
