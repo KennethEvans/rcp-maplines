@@ -61,8 +61,23 @@ public class Line
         }
     }
 
+    /**
+     * Gets the number of points in the line.
+     * 
+     * @return
+     */
     public int getNPoints() {
         return points.size();
+    }
+
+    /**
+     * Deletes the last point of the line if there is one.
+     */
+    public void deleteLastPoint() {
+        int nPoints = points.size();
+        if(nPoints > 0) {
+            points.remove(nPoints - 1);
+        }
     }
 
     /**

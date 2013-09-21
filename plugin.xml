@@ -111,8 +111,8 @@
                style="push">
          </command>
          <command
-               commandId="net.kenevans.maplines.deletecurrentline"
-               label="Delete Current Line"
+               commandId="net.kenevans.maplines.deletelastpoint"
+               label="Delete Last Point"
                style="push">
          </command>
          <separator
@@ -199,8 +199,8 @@
       </command>
       <command
             categoryId="net.kenevans.maplines.category"
-            id="net.kenevans.maplines.deletecurrentline"
-            name="Delete Current Line">
+            id="net.kenevans.maplines.deletelastpoint"
+            name="Delete Last Point">
       </command>
       <command
             categoryId="net.kenevans.maplines.category"

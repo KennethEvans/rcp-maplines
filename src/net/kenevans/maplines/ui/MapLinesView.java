@@ -472,11 +472,11 @@ public class MapLinesView extends ViewPart
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
                 throws ExecutionException {
-                deleteCurrentLine();
+                deleteLastPoint();
                 return null;
             }
         };
-        id = "net.kenevans.maplines.deletecurrentline";
+        id = "net.kenevans.maplines.deletelastpoint";
         handlerService.activateHandler(id, handler);
 
         // Save GPX
@@ -603,7 +603,7 @@ public class MapLinesView extends ViewPart
     /**
      * Deletes the current line.
      */
-    public void deleteCurrentLine() {
+    public void deleteLastPoint() {
         if(viewer == null) {
             return;
         }
@@ -611,8 +611,7 @@ public class MapLinesView extends ViewPart
             SWTUtils.errMsg("There is no current line active");
             return;
         }
-        lines.removeLine(viewer.getCurLine());
-        viewer.setCurLine(null);
+        viewer.getCurLine().deleteLastPoint();
         viewer.getCanvas().redraw();
         // // DEBUG
         // System.out.println("endLine");
