@@ -3,6 +3,7 @@ package net.kenevans.maplines.ui;
 import java.io.File;
 
 import net.kenevans.core.utils.SWTUtils;
+import net.kenevans.maplines.lines.GPSLUtils;
 import net.kenevans.maplines.lines.GPXUtils;
 import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
@@ -197,14 +198,14 @@ public class MapLinesView extends ViewPart
             }
         }
     }
-    
+
     public void editLines() {
         EditLinesDialog dialog = null;
         boolean success = false;
         // Without this try/catch, the application hangs on error
         try {
             dialog = new EditLinesDialog(Display.getDefault().getActiveShell(),
-               this);
+                this);
             success = dialog.open();
         } catch(Exception ex) {
             SWTUtils.excMsgAsync("Error with EditLinesDialog", ex);
@@ -333,6 +334,52 @@ public class MapLinesView extends ViewPart
             }
 
             GPXUtils.writeGPXFile(fileName, trackName, mapCalibration, lines);
+        }
+    }
+
+    /**
+     * Brings up a FileDialog to choose a GPSL file to save maps and
+     * calibration.
+     */
+    public void saveGPSLMap() {
+        if(lines == null) {
+            SWTUtils.errMsg("No lines available");
+            return;
+        }
+        if(mapCalibration == null) {
+            SWTUtils
+                .errMsg("Calibration for converting lines is not available");
+            return;
+        }
+        if(mapCalibration.getTransform() == null) {
+            SWTUtils.errMsg("Calibration for converting lines is not valid");
+            return;
+        }
+        // Open a FileDialog
+        FileDialog dlg = new FileDialog(Display.getDefault().getActiveShell(),
+            SWT.SAVE);
+        String[] extensions = {"*.gpsl"};
+        String[] names = {"GPSL: *.gpsl"};
+        dlg.setFilterExtensions(extensions);
+        dlg.setFilterNames(names);
+
+        int index = 0;
+        String selectedPath = dlg.open();
+        String fileName = selectedPath;
+        // Save the path for next time
+        if(selectedPath != null) {
+            initialDataPath = selectedPath;
+            // Extract the directory part of the selectedPath
+            index = selectedPath.lastIndexOf(File.separator);
+            if(index > 0) {
+                initialDataPath = selectedPath.substring(0, index);
+            }
+            try {
+                GPSLUtils.saveGPSLMapFile(fileName, imageFileName,
+                    mapCalibration);
+            } catch(Throwable t) {
+                SWTUtils.excMsg("Failed to create GPSL file", t);
+            }
         }
     }
 
@@ -488,6 +535,17 @@ public class MapLinesView extends ViewPart
             }
         };
         id = "net.kenevans.maplines.savegpx";
+        handlerService.activateHandler(id, handler);
+
+        // Save GPSL
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                saveGPSLMap();
+                return null;
+            }
+        };
+        id = "net.kenevans.maplines.savegpsl";
         handlerService.activateHandler(id, handler);
 
         // Start Line
@@ -653,5 +711,5 @@ public class MapLinesView extends ViewPart
     public SWTImageViewerControl getViewer() {
         return viewer;
     }
-    
+
 }

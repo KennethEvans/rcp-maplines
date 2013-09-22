@@ -75,6 +75,11 @@
                   label="Save GPX..."
                   style="push">
             </command>
+            <command
+                  commandId="net.kenevans.maplines.savegpsl"
+                  label="Save GPSL..."
+                  style="push">
+            </command>
             <separator
                   name="separator1"
                   visible="true">
@@ -181,6 +186,11 @@
             categoryId="net.kenevans.maplines.category"
             id="net.kenevans.maplines.savegpx"
             name="Save GPX...">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.savegpsl"
+            name="Save GPSL...">
       </command>
       <command
             categoryId="net.kenevans.maplines.category"
