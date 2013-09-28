@@ -125,10 +125,10 @@ public class MapCalibration
             double f = xx.get(5, 0);
             transform = new MapTransform(a, b, c, d, e, f);
             // DEBUG
-            System.out.println(String.format(
-                "  a=%.3g b=%.3g c=%.3g d=%.3g e=%.3g f= %.3g",
-                transform.getA(), transform.getB(), transform.getC(),
-                transform.getD(), transform.getE(), transform.getF()));
+            // System.out.println(String.format(
+            // "  a=%.3g b=%.3g c=%.3g d=%.3g e=%.3g f= %.3g",
+            // transform.getA(), transform.getB(), transform.getC(),
+            // transform.getD(), transform.getE(), transform.getF()));
         } catch(Exception ex) {
             SWTUtils.excMsg("Failed to create calibration transform", ex);
             transform = null;
@@ -186,10 +186,10 @@ public class MapCalibration
                 / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
             transform = new MapTransform(a, b, c, d, e, f);
             // DEBUG
-            System.out.println(String.format(
-                "  a=%.3g b=%.3g c=%.3g d=%.3g e=%.3g f= %.3g",
-                transform.getA(), transform.getB(), transform.getC(),
-                transform.getD(), transform.getE(), transform.getF()));
+            // System.out.println(String.format(
+            // "  a=%.3g b=%.3g c=%.3g d=%.3g e=%.3g f= %.3g",
+            // transform.getA(), transform.getB(), transform.getC(),
+            // transform.getD(), transform.getE(), transform.getF()));
         } catch(Exception ex) {
             SWTUtils.excMsg("Failed to create calibration transform", ex);
             transform = null;

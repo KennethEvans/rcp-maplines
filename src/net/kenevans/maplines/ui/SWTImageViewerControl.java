@@ -7,12 +7,14 @@ import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
 import net.kenevans.maplines.lines.MapCalibration;
 import net.kenevans.maplines.lines.MapCalibration.MapData;
+import net.kenevans.maplines.plugin.Sleak;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.DeviceData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;

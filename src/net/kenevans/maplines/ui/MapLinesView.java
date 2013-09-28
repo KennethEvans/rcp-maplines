@@ -9,6 +9,7 @@ import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
 import net.kenevans.maplines.lines.MapCalibration;
 import net.kenevans.maplines.lines.MapCalibration.MapData;
+import net.kenevans.maplines.plugin.Sleak;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -133,6 +134,11 @@ public class MapLinesView extends ViewPart
 
         createHandlers();
         hookContextMenu(viewer.getCanvas());
+        
+        // // DEBUG
+        // // Sleak
+        // Sleak sleak = new Sleak();
+        // sleak.open();
     }
 
     /**
@@ -389,15 +395,30 @@ public class MapLinesView extends ViewPart
      * @param fileName
      */
     public void loadImage(String fileName) {
+//        // DEBUG
+//        System.out.println("loadImage:");
+//        double free = Runtime.getRuntime().freeMemory();
+//        double total = Runtime.getRuntime().totalMemory();
+//        double max = Runtime.getRuntime().maxMemory();
+//        System.out.println(String.format(
+//            "  Before: Free Memory: %.2f / %.2f (Max %.2f) MB",
+//            free / 1024. / 1024., total / 1024. / 1024., max / 1024. / 1024.));
         try {
             Image newImage = new Image(display, fileName);
             shell.setText(fileName);
             imageFileName = fileName;
             viewer.setImage(newImage);
-        } catch(RuntimeException ex) {
+        } catch(Throwable t) {
             SWTUtils.excMsgAsync(shell, "Cannot load image from:\n" + fileName,
-                ex);
+                t);
         }
+        // // DEBUG
+        // free = Runtime.getRuntime().freeMemory();
+        // total = Runtime.getRuntime().totalMemory();
+        // max = Runtime.getRuntime().maxMemory();
+        // System.out.println(String.format(
+        // "  After:  Free Memory: %.2f / %.2f (Max %.2f) MB",
+        // free / 1024. / 1024., total / 1024. / 1024., max / 1024. / 1024.));
     }
 
     /**

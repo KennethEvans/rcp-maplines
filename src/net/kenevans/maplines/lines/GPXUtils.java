@@ -18,6 +18,31 @@ import org.eclipse.swt.graphics.Point;
 
 public class GPXUtils
 {
+    /** The default speed to use for calculating time differences (mph). */
+    public static double DEFAULT_SPEED = 10;
+
+    /**
+     * Nominal radius of the earth in miles. The radius actually varies from
+     * 3937 to 3976 mi.
+     */
+    public static final double REARTH = 3956;
+    /** Multiplier to convert miles to nautical miles. */
+    public static final double MI2NMI = 1.852; // Exact
+    /** Multiplier to convert degrees to radians. */
+    public static final double DEG2RAD = Math.PI / 180.;
+    /** Multiplier to convert feet to miles. */
+    public static final double FT2MI = 1. / 5280.;
+    /** Multiplier to convert meters to miles. */
+    public static final double M2MI = .00062137119224;
+    /** Multiplier to convert kilometers to miles. */
+    public static final double KM2MI = .001 * M2MI;
+    /** Multiplier to convert meters to feet. */
+    public static final double M2FT = 3.280839895;
+    /** Multiplier to convert sec to hours. */
+    public static final double SEC2HR = 1. / 3600.;
+    /** Multiplier to convert millisec to hours. */
+    public static final double MS2HR = .001 * SEC2HR;
+
     public static void writeGPXFile(String fileName, String trackName,
         MapCalibration mapCalibration, Lines lines) {
         File file = new File(fileName);
@@ -38,7 +63,7 @@ public class GPXUtils
                 out.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");
                 out.println("<gpx");
                 out.println(" creator=\"MapLines\"");
-                // out.println(" version=\"1.1\"");
+                out.println(" version=\"1.1\"");
                 out.println(" xmlns=\"http://www.topografix.com/GPX/1/1\"");
                 out.println(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
                 out.println(" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 ");
@@ -61,6 +86,9 @@ public class GPXUtils
                     out.println("        <gpxx:DisplayColor>Blue</gpxx:DisplayColor>");
                     out.println("      </gpxx:TrackExtension>");
                     out.println("    </extensions>");
+                    double lon0 = 0, lat0 = 0;
+                    double dist = 0;
+                    long time = 0;
                     for(int i = 0; i < lines.getNLines(); i++) {
                         line = lines.getLines().get(i);
                         out.println("    <trkseg>");
@@ -72,6 +100,21 @@ public class GPXUtils
                                 "      <trkpt lat=\"%f\" lon=\"%f\">", vals[1],
                                 vals[0]));
                             out.println("        <ele>0.0</ele>");
+                            // Increment the time assuming a default speed
+                            if(j == 0) {
+                                lon0 = vals[0];
+                                lat0 = vals[1];
+                            } else {
+                                dist = Math.abs(GPXUtils.M2MI
+                                    * GPXUtils.greatCircleDistance(lat0, lon0,
+                                        vals[1], vals[0]));
+                                time = (long)(dist / DEFAULT_SPEED * 3600. * 1000.);
+                                date.setTime(date.getTime() + time);
+                                System.out.println("dist=" + dist + " time="
+                                    + time + " (" + time / 1000 + " sec)");
+                                lon0 = vals[0];
+                                lat0 = vals[1];
+                            }
                             out.println(String.format(
                                 "        <time>%s</time>", timeString(date)));
                             out.println("      </trkpt>");
@@ -98,6 +141,36 @@ public class GPXUtils
             "yyyy-MM-dd'T'HH:mm:ss'Z'");
         formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
         return formatter.format(date);
+    }
+
+    /**
+     * Returns great circle distance in meters. assuming a spherical earth. Uses
+     * Haversine formula.
+     * 
+     * @param lat1 Start latitude in deg.
+     * @param lon1 Start longitude in deg.
+     * @param lat2 End latitude in deg.
+     * @param lon2 End longitude in deg.
+     * @return
+     */
+    public static double greatCircleDistance(double lat1, double lon1,
+        double lat2, double lon2) {
+        double slon, slat, a, c, d;
+
+        // Convert to radians
+        lat1 *= DEG2RAD;
+        lon1 *= DEG2RAD;
+        lat2 *= DEG2RAD;
+        lon2 *= DEG2RAD;
+
+        // Haversine formula
+        slon = Math.sin((lon2 - lon1) / 2.);
+        slat = Math.sin((lat2 - lat1) / 2.);
+        a = slat * slat + Math.cos(lat1) * Math.cos(lat2) * slon * slon;
+        c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        d = REARTH / M2MI * c;
+
+        return (d);
     }
 
 }

@@ -7,12 +7,11 @@
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xms40m -Xmx256m</vmArgs>
+      <vmArgs>-Xms40m -Xmx512m</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
    <windowImages i16="icons/MapLines16.png" i32="icons/MapLines32.png"/>
-
 
    <launcher name="MapLines">
       <solaris/>
