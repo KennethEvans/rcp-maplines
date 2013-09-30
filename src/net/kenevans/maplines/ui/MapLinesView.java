@@ -9,7 +9,6 @@ import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
 import net.kenevans.maplines.lines.MapCalibration;
 import net.kenevans.maplines.lines.MapCalibration.MapData;
-import net.kenevans.maplines.plugin.Sleak;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
