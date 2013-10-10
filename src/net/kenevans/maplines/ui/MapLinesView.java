@@ -9,6 +9,8 @@ import net.kenevans.maplines.lines.Line;
 import net.kenevans.maplines.lines.Lines;
 import net.kenevans.maplines.lines.MapCalibration;
 import net.kenevans.maplines.lines.MapCalibration.MapData;
+import net.kenevans.maplines.plugin.Activator;
+import net.kenevans.maplines.plugin.IPreferenceConstants;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -17,6 +19,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -36,28 +39,42 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 
-public class MapLinesView extends ViewPart
+public class MapLinesView extends ViewPart implements IPreferenceConstants
 {
     public static final String ID = "net.kenevans.maplines.view";
-    public static final boolean useStartImage = true;
-    // public static final String startImageName =
-    // "C:/users/evans/Pictures/DAZ.Dogfight.15017.jpg";
-    // public static final String startImageName =
-    // "C:/Scratch/Wisconsin RR/BoulderJunction-Cabin.jpg";
-    public static final String startImageName = "C:/Scratch/Wisconsin RR/Boulder Junction.jpg";
+
+    /** The name of the current image file */
+    protected String imageFileName;
+    /** The name of the current calibration file */
+    protected String calibFileName;
 
     private Display display;
     private Shell shell;
 
+    /**
+     * Image path used for initializing the open image and open calibration
+     * dialog.
+     */
     protected String initialImagePath;
+    /**
+     * Image path used for initializing the open dialog for other than images
+     * and calibration.
+     */
     protected String initialDataPath;
 
+    /** The viewer that controls most of the drawing. */
     protected SWTImageViewerControl viewer;
+
+    /** The Lines class that holds the lines. May be empty. */
     protected Lines lines;
 
+    /** The MapCalibration class that holds the calibration if any. */
     protected MapCalibration mapCalibration;
-    protected String imageFileName;
 
+    /**
+     * Counter used for naming lines. Is incremented when each line is created.
+     * Does not account for deleted or renamed lines but continues incrementing.
+     */
     protected static int nextLineNumber = 1;
 
     /**
@@ -114,6 +131,17 @@ public class MapLinesView extends ViewPart
         layout.marginHeight = 2;
         parent.setLayout(layout);
 
+        // Get the stored values
+        IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
+        imageFileName = prefs.getString(P_IMAGE_FILE_NAME);
+        if(imageFileName != null && imageFileName.length() == 0) {
+            imageFileName = null;
+        }
+        calibFileName = prefs.getString(P_CALIB_FILE_NAME);
+        if(calibFileName != null && calibFileName.length() == 0) {
+            calibFileName = null;
+        }
+
         // SWT.DEFAULT gives scroll bars in addition to those on the Control
         // SWT.NONE does not
         viewer = new SWTImageViewerControl(parent, SWT.NONE, this);
@@ -126,14 +154,17 @@ public class MapLinesView extends ViewPart
         // viewer.setBackground(display.getSystemColor(SWT.COLOR_BLUE));
         // parent.setBackground(display.getSystemColor(SWT.COLOR_RED));
 
-        // Load the starting image
-        if(useStartImage) {
-            loadImage(startImageName);
+        // Load the starting image and calibration file
+        if(imageFileName != null) {
+            loadImage(imageFileName);
+        }
+        if(calibFileName != null) {
+            loadCalibFile(calibFileName);
         }
 
         createHandlers();
         hookContextMenu(viewer.getCanvas());
-        
+
         // // DEBUG
         // // Sleak
         // Sleak sleak = new Sleak();
@@ -193,17 +224,36 @@ public class MapLinesView extends ViewPart
             if(index > 0) {
                 initialImagePath = selectedPath.substring(0, index);
             }
-            try {
-                mapCalibration = new MapCalibration();
-                mapCalibration.read(new File(fileName));
-                viewer.getCanvas().redraw();
-            } catch(Exception ex) {
-                SWTUtils.excMsg("Failed to read calibration file", ex);
-                mapCalibration = null;
-            }
+            loadCalibFile(fileName);
         }
     }
 
+    /**
+     * Creates a MapCalibration and reads the given fileName as the calibration
+     * file.
+     * 
+     * @param fileName
+     */
+    public void loadCalibFile(String fileName) {
+        try {
+            mapCalibration = new MapCalibration();
+            mapCalibration.read(new File(fileName));
+            calibFileName = fileName;
+            // Save this as a startup preference
+            IPreferenceStore prefs = Activator.getDefault()
+                .getPreferenceStore();
+            prefs.setValue(P_CALIB_FILE_NAME, calibFileName);
+            viewer.getCanvas().redraw();
+        } catch(Exception ex) {
+            SWTUtils.excMsg("Failed to read calibration file", ex);
+            mapCalibration = null;
+            calibFileName = null;
+        }
+    }
+
+    /**
+     * Brings up a dialog to edit the current lines.
+     */
     public void editLines() {
         EditLinesDialog dialog = null;
         boolean success = false;
@@ -360,6 +410,10 @@ public class MapLinesView extends ViewPart
             SWTUtils.errMsg("Calibration for converting lines is not valid");
             return;
         }
+        if(imageFileName == null || imageFileName.length() == 0) {
+            SWTUtils.errMsg("Image file is invalid");
+            return;
+        }
         // Open a FileDialog
         FileDialog dlg = new FileDialog(Display.getDefault().getActiveShell(),
             SWT.SAVE);
@@ -394,22 +448,34 @@ public class MapLinesView extends ViewPart
      * @param fileName
      */
     public void loadImage(String fileName) {
-//        // DEBUG
-//        System.out.println("loadImage:");
-//        double free = Runtime.getRuntime().freeMemory();
-//        double total = Runtime.getRuntime().totalMemory();
-//        double max = Runtime.getRuntime().maxMemory();
-//        System.out.println(String.format(
-//            "  Before: Free Memory: %.2f / %.2f (Max %.2f) MB",
-//            free / 1024. / 1024., total / 1024. / 1024., max / 1024. / 1024.));
+        // // DEBUG
+        // System.out.println("loadImage:");
+        // double free = Runtime.getRuntime().freeMemory();
+        // double total = Runtime.getRuntime().totalMemory();
+        // double max = Runtime.getRuntime().maxMemory();
+        // System.out.println(String.format(
+        // "  Before: Free Memory: %.2f / %.2f (Max %.2f) MB",
+        // free / 1024. / 1024., total / 1024. / 1024., max / 1024. / 1024.));
+        Image newImage = null;
         try {
-            Image newImage = new Image(display, fileName);
+            // Do this to conserve memory
+            viewer.setImage(null);
+            newImage = new Image(display, fileName);
             shell.setText(fileName);
             imageFileName = fileName;
+            // Save this as a startup preference
+            IPreferenceStore prefs = Activator.getDefault()
+                .getPreferenceStore();
+            prefs.setValue(P_IMAGE_FILE_NAME, imageFileName);
             viewer.setImage(newImage);
         } catch(Throwable t) {
             SWTUtils.excMsgAsync(shell, "Cannot load image from:\n" + fileName,
                 t);
+            imageFileName = null;
+            if(newImage != null &&  !newImage.isDisposed()) {
+                newImage.dispose();
+                newImage = null;
+            }
         }
         // // DEBUG
         // free = Runtime.getRuntime().freeMemory();

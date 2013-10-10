@@ -52,13 +52,13 @@
                   style="push">
             </command>
             <command
-                  commandId="net.kenevans.maplines.openlines"
-                  label="Open Lines..."
+                  commandId="net.kenevans.maplines.opencalibration"
+                  label="Open Calibration..."
                   style="push">
             </command>
             <command
-                  commandId="net.kenevans.maplines.opencalibration"
-                  label="Open Calibration..."
+                  commandId="net.kenevans.maplines.openlines"
+                  label="Open Lines..."
                   style="push">
             </command>
             <separator

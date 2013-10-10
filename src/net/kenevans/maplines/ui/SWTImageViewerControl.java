@@ -249,6 +249,10 @@ public class SWTImageViewerControl extends Composite
      */
     @Override
     public void dispose() {
+        if(this.image != null && !this.image.isDisposed()) {
+            this.image.dispose();
+            this.image = null;
+        }
     }
 
     /**
@@ -265,6 +269,7 @@ public class SWTImageViewerControl extends Composite
         if(this.image != image) {
             if(this.image != null && !this.image.isDisposed()) {
                 this.image.dispose();
+                this.image = null;
             }
             this.image = image;
             resetCanvas();
@@ -276,7 +281,10 @@ public class SWTImageViewerControl extends Composite
      */
     public void resetCanvas() {
         if(canvas == null || canvas.isDisposed()) return;
-        if(image == null || image.isDisposed()) return;
+        if(image == null || image.isDisposed()) {
+            canvas.redraw();
+            return;
+        }
         if(hBar == null || hBar.isDisposed()) return;
         if(vBar == null || vBar.isDisposed()) return;
         Rectangle rect = image.getBounds();
