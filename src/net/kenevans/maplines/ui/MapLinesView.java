@@ -2,16 +2,6 @@ package net.kenevans.maplines.ui;
 
 import java.io.File;
 
-import net.kenevans.core.utils.SWTUtils;
-import net.kenevans.maplines.lines.GPSLUtils;
-import net.kenevans.maplines.lines.GPXUtils;
-import net.kenevans.maplines.lines.Line;
-import net.kenevans.maplines.lines.Lines;
-import net.kenevans.maplines.lines.MapCalibration;
-import net.kenevans.maplines.lines.MapCalibration.MapData;
-import net.kenevans.maplines.plugin.Activator;
-import net.kenevans.maplines.plugin.IPreferenceConstants;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -39,6 +29,16 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 
+import net.kenevans.core.utils.SWTUtils;
+import net.kenevans.maplines.lines.GPSLUtils;
+import net.kenevans.maplines.lines.GPXUtils;
+import net.kenevans.maplines.lines.Line;
+import net.kenevans.maplines.lines.Lines;
+import net.kenevans.maplines.lines.MapCalibration;
+import net.kenevans.maplines.lines.MapCalibration.MapData;
+import net.kenevans.maplines.plugin.Activator;
+import net.kenevans.maplines.plugin.IPreferenceConstants;
+
 public class MapLinesView extends ViewPart implements IPreferenceConstants
 {
     public static final String ID = "net.kenevans.maplines.view";
@@ -52,13 +52,24 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
     private Shell shell;
 
     /**
-     * Image path used for initializing the open image and open calibration
-     * dialog.
+     * Image path used for initializing the open image dialog.
      */
     protected String initialImagePath;
     /**
+     * Image path used for initializing the open calibration dialog.
+     */
+    protected String initialCalibPath;
+    /**
+     * Image path used for initializing the open lines dialog.
+     */
+    protected String initialLinesPath;
+    /**
+     * Image path used for opening GPX files.
+     */
+    protected String initialGpxPath;
+    /**
      * Image path used for initializing the open dialog for other than images
-     * and calibration.
+     * and calibration, in particular writing GPX and GPSL files.
      */
     protected String initialDataPath;
 
@@ -100,8 +111,7 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         }
     }
 
-    class ViewLabelProvider extends LabelProvider implements
-        ITableLabelProvider
+    class ViewLabelProvider extends LabelProvider implements ITableLabelProvider
     {
         public String getColumnText(Object obj, int index) {
             return getText(obj);
@@ -121,6 +131,7 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
      * This is a callback that will allow us to create the viewer and initialize
      * it.
      */
+    @Override
     public void createPartControl(Composite parent) {
         display = parent.getDisplay();
         shell = parent.getShell();
@@ -138,8 +149,28 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
             imageFileName = null;
         }
         calibFileName = prefs.getString(P_CALIB_FILE_NAME);
-        if(calibFileName != null && calibFileName.length() == 0) {
+         if(calibFileName != null && calibFileName.length() == 0) {
             calibFileName = null;
+        }
+        initialImagePath = prefs.getString(P_INITIAL_IMAGE_PATH);
+        if(initialImagePath != null && initialImagePath.length() == 0) {
+            initialImagePath = null;
+        }
+        initialCalibPath = prefs.getString(P_INITIAL_CALIB_PATH);
+        if(initialCalibPath != null && initialCalibPath.length() == 0) {
+            initialCalibPath = null;
+        }
+        initialLinesPath = prefs.getString(P_INITIAL_LINES_PATH);
+        if(initialLinesPath != null && initialLinesPath.length() == 0) {
+            initialLinesPath = null;
+        }
+        initialDataPath = prefs.getString(P_INITIAL_DATA_PATH);
+        if(initialDataPath != null && initialDataPath.length() == 0) {
+            initialDataPath = null;
+        }
+        initialGpxPath = prefs.getString(P_INITIAL_GPX_PATH);
+        if(initialGpxPath != null && initialGpxPath.length() == 0) {
+            initialGpxPath = null;
         }
 
         // SWT.DEFAULT gives scroll bars in addition to those on the Control
@@ -179,24 +210,32 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
     }
 
     /**
+     * Utility to set preference String Value to handle its not allowing null
+     * 
+     * @param name
+     * @param value
+     */
+    public void setStringPreference(String name, String value) {
+        IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
+        if(prefs != null && value != null) {
+            prefs.setValue(name, value);
+        }
+    }
+
+    /**
      * Brings up a FileDialog to choose an image file.
      */
     public void openImage() {
         // Open a FileDialog
         FileDialog dlg = new FileDialog(Display.getDefault().getActiveShell(),
             SWT.OPEN);
+        dlg.setFilterPath(initialImagePath);
 
-        int index = 0;
         String selectedPath = dlg.open();
         String fileName = selectedPath;
         // Save the path for next time
         if(selectedPath != null) {
-            initialImagePath = selectedPath;
-            // Extract the directory part of the selectedPath
-            index = selectedPath.lastIndexOf(File.separator);
-            if(index > 0) {
-                initialImagePath = selectedPath.substring(0, index);
-            }
+            // initialImagePath will be set in loadImage
             loadImage(fileName);
         }
     }
@@ -212,18 +251,12 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         String[] names = {"Calibration: *.calib"};
         dlg.setFilterExtensions(extensions);
         dlg.setFilterNames(names);
+        dlg.setFilterPath(initialCalibPath);
 
-        int index = 0;
         String selectedPath = dlg.open();
         String fileName = selectedPath;
-        // Save the path for next time
         if(selectedPath != null) {
-            initialImagePath = selectedPath;
-            // Extract the directory part of the selectedPath
-            index = selectedPath.lastIndexOf(File.separator);
-            if(index > 0) {
-                initialImagePath = selectedPath.substring(0, index);
-            }
+            // initialCalibPath will be set in loadCalibFile
             loadCalibFile(fileName);
         }
     }
@@ -239,10 +272,14 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
             mapCalibration = new MapCalibration();
             mapCalibration.read(new File(fileName));
             calibFileName = fileName;
-            // Save this as a startup preference
-            IPreferenceStore prefs = Activator.getDefault()
-                .getPreferenceStore();
-            prefs.setValue(P_CALIB_FILE_NAME, calibFileName);
+            // Extract the directory part of the selectedPath
+            int index = fileName.lastIndexOf(File.separator);
+            if(index > 0) {
+                initialCalibPath = fileName.substring(0, index);
+            }
+            // Save these as startup preferences
+            setStringPreference(P_CALIB_FILE_NAME, calibFileName);
+            setStringPreference(P_INITIAL_CALIB_PATH, initialCalibPath);
             viewer.getCanvas().redraw();
         } catch(Exception ex) {
             SWTUtils.excMsg("Failed to read calibration file", ex);
@@ -282,23 +319,66 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         String[] names = {"Lines: *.lines"};
         dlg.setFilterExtensions(extensions);
         dlg.setFilterNames(names);
+        dlg.setFilterPath(initialLinesPath);
 
         int index = 0;
         String selectedPath = dlg.open();
         String fileName = selectedPath;
         // Save the path for next time
         if(selectedPath != null) {
-            initialImagePath = selectedPath;
             // Extract the directory part of the selectedPath
             index = selectedPath.lastIndexOf(File.separator);
             if(index > 0) {
-                initialImagePath = selectedPath.substring(0, index);
+                initialLinesPath = selectedPath.substring(0, index);
+                setStringPreference(P_INITIAL_LINES_PATH, initialLinesPath);
             }
             try {
                 lines.readLines(fileName);
             } catch(Exception ex) {
                 SWTUtils.excMsg("Failed to read lines file", ex);
-                mapCalibration = null;
+            }
+            viewer.getCanvas().redraw();
+        }
+    }
+
+    /**
+     * Brings up a FileDialog to choose a GPX file for lines.
+     */
+    public void linesFromGpx() {
+        if(mapCalibration == null) {
+            SWTUtils
+                .errMsg("Calibration for converting lines is not available");
+            return;
+        }
+        if(mapCalibration.getTransform() == null) {
+            SWTUtils.errMsg("Calibration for converting lines is not valid");
+            return;
+        }
+        // Open a FileDialog
+        FileDialog dlg = new FileDialog(Display.getDefault().getActiveShell(),
+            SWT.OPEN);
+        String[] extensions = {"*.gpx"};
+        String[] names = {"GPX: *.gpx"};
+        dlg.setFilterExtensions(extensions);
+        dlg.setFilterNames(names);
+        dlg.setFilterPath(initialGpxPath);
+
+        int index = 0;
+        String selectedPath = dlg.open();
+        String fileName = selectedPath;
+        // Save the path for next time
+        if(selectedPath != null) {
+            initialGpxPath = selectedPath;
+            // Extract the directory part of the selectedPath
+            index = selectedPath.lastIndexOf(File.separator);
+            if(index > 0) {
+                initialGpxPath = selectedPath.substring(0, index);
+                setStringPreference(P_INITIAL_GPX_PATH, initialGpxPath);
+            }
+            try {
+                lines.readGpxLines(fileName, mapCalibration);
+            } catch(Exception ex) {
+                SWTUtils.excMsg("Failed to read GPX file", ex);
             }
             viewer.getCanvas().redraw();
         }
@@ -315,17 +395,19 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         String[] names = {"Lines: *.lines"};
         dlg.setFilterExtensions(extensions);
         dlg.setFilterNames(names);
+        dlg.setFilterPath(initialLinesPath);
 
         int index = 0;
         String selectedPath = dlg.open();
         String fileName = selectedPath;
         // Save the path for next time
         if(selectedPath != null) {
-            initialDataPath = selectedPath;
+            initialLinesPath = selectedPath;
             // Extract the directory part of the selectedPath
             index = selectedPath.lastIndexOf(File.separator);
             if(index > 0) {
-                initialDataPath = selectedPath.substring(0, index);
+                initialLinesPath = selectedPath.substring(0, index);
+                setStringPreference(P_INITIAL_LINES_PATH, initialLinesPath);
             }
             lines.saveLines(fileName);
         }
@@ -355,6 +437,7 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         String[] names = {"GPX: *.gpx"};
         dlg.setFilterExtensions(extensions);
         dlg.setFilterNames(names);
+        dlg.setFilterPath(initialDataPath);
 
         int index = 0;
         String selectedPath = dlg.open();
@@ -366,6 +449,7 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
             index = selectedPath.lastIndexOf(File.separator);
             if(index > 0) {
                 initialDataPath = selectedPath.substring(0, index);
+                setStringPreference(P_INITIAL_DATA_PATH, initialDataPath);
             }
             String trackName = "Map Lines";
             if(imageFileName != null) {
@@ -421,6 +505,7 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         String[] names = {"GPSL: *.gpsl"};
         dlg.setFilterExtensions(extensions);
         dlg.setFilterNames(names);
+        dlg.setFilterPath(initialDataPath);
 
         int index = 0;
         String selectedPath = dlg.open();
@@ -432,6 +517,7 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
             index = selectedPath.lastIndexOf(File.separator);
             if(index > 0) {
                 initialDataPath = selectedPath.substring(0, index);
+                setStringPreference(P_INITIAL_DATA_PATH, initialDataPath);
             }
             try {
                 GPSLUtils.saveGPSLMapFile(fileName, imageFileName,
@@ -454,8 +540,11 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         // double total = Runtime.getRuntime().totalMemory();
         // double max = Runtime.getRuntime().maxMemory();
         // System.out.println(String.format(
-        // "  Before: Free Memory: %.2f / %.2f (Max %.2f) MB",
+        // " Before: Free Memory: %.2f / %.2f (Max %.2f) MB",
         // free / 1024. / 1024., total / 1024. / 1024., max / 1024. / 1024.));
+        if(fileName == null) {
+            return;
+        }
         Image newImage = null;
         try {
             // Do this to conserve memory
@@ -463,16 +552,20 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
             newImage = new Image(display, fileName);
             shell.setText(fileName);
             imageFileName = fileName;
-            // Save this as a startup preference
-            IPreferenceStore prefs = Activator.getDefault()
-                .getPreferenceStore();
-            prefs.setValue(P_IMAGE_FILE_NAME, imageFileName);
+            // Extract the directory part of the selectedPath
+            int index = fileName.lastIndexOf(File.separator);
+            if(index > 0) {
+                initialImagePath = fileName.substring(0, index);
+            }
+            // Save these as startup preferences
+            setStringPreference(P_IMAGE_FILE_NAME, imageFileName);
+            setStringPreference(P_INITIAL_IMAGE_PATH, initialImagePath);
             viewer.setImage(newImage);
         } catch(Throwable t) {
             SWTUtils.excMsgAsync(shell, "Cannot load image from:\n" + fileName,
                 t);
             imageFileName = null;
-            if(newImage != null &&  !newImage.isDisposed()) {
+            if(newImage != null && !newImage.isDisposed()) {
                 newImage.dispose();
                 newImage = null;
             }
@@ -482,7 +575,7 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         // total = Runtime.getRuntime().totalMemory();
         // max = Runtime.getRuntime().maxMemory();
         // System.out.println(String.format(
-        // "  After:  Free Memory: %.2f / %.2f (Max %.2f) MB",
+        // " After: Free Memory: %.2f / %.2f (Max %.2f) MB",
         // free / 1024. / 1024., total / 1024. / 1024., max / 1024. / 1024.));
     }
 
@@ -518,8 +611,8 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
         // and any active handlers will be deactivated (but not disposed).
 
         // Get the handler service from the view site
-        IHandlerService handlerService = (IHandlerService)getSite().getService(
-            IHandlerService.class);
+        IHandlerService handlerService = (IHandlerService)getSite()
+            .getService(IHandlerService.class);
 
         AbstractHandler handler;
         String id;
@@ -555,6 +648,17 @@ public class MapLinesView extends ViewPart implements IPreferenceConstants
             }
         };
         id = "net.kenevans.maplines.openlines";
+        handlerService.activateHandler(id, handler);
+
+        // Open GPX lines
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                linesFromGpx();
+                return null;
+            }
+        };
+        id = "net.kenevans.maplines.linesfromgpx";
         handlerService.activateHandler(id, handler);
 
         // Edit Lines

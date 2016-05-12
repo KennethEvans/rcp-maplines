@@ -2,6 +2,8 @@ package net.kenevans.maplines.lines;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,9 +11,19 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.kenevans.core.utils.SWTUtils;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.swt.graphics.Point;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import net.kenevans.core.utils.SWTUtils;
 
 /*
  * Created on Aug 17, 2013
@@ -27,12 +39,12 @@ public class Lines
 
     public Lines() {
         if(doTest) {
-            lines.add(new Line(new int[][] { {405, 5}, {406, 110}, {412, 204},
+            lines.add(new Line(new int[][] {{405, 5}, {406, 110}, {412, 204},
                 {420, 220}, {530, 220}, {5640, 330}}));
-            lines.add(new Line(new int[][] { {-30, 135}, {220, 10}, {216, 204},
+            lines.add(new Line(new int[][] {{-30, 135}, {220, 10}, {216, 204},
                 {312, 320}, {415, 520}, {340, 630}}));
-            lines.add(new Line(new int[][] { {435, 307}, {456, 305},
-                {522, 304}, {532, 320}, {618, 325}, {540, 550}}));
+            lines.add(new Line(new int[][] {{435, 307}, {456, 305}, {522, 304},
+                {532, 320}, {618, 325}, {540, 550}}));
         }
     }
 
@@ -96,8 +108,8 @@ public class Lines
         File file = new File(fileName);
         boolean doIt = true;
         if(file.exists()) {
-            Boolean res = SWTUtils.confirmMsg("File exists: " + file.getPath()
-                + "\nOK to overwrite?");
+            Boolean res = SWTUtils.confirmMsg(
+                "File exists: " + file.getPath() + "\nOK to overwrite?");
             if(!res) {
                 doIt = false;
             }
@@ -141,8 +153,8 @@ public class Lines
      * @throws NumberFormatException
      * @throws IOException
      */
-    public boolean readLines(String fileName) throws NumberFormatException,
-        IOException {
+    public boolean readLines(String fileName)
+        throws NumberFormatException, IOException {
         boolean ok = false;
         BufferedReader in = null;
         String[] tokens = null;
@@ -193,6 +205,67 @@ public class Lines
     }
 
     /**
+     * Reads lines from a GPX file and adds them to the current lines.
+     * 
+     * @param fileName
+     * @return
+     * @throws NumberFormatException
+     * @throws IOException
+     */
+    public boolean readGpxLines(String fileName, MapCalibration mapCalibration)
+        throws NumberFormatException, IOException {
+        boolean ok = false;
+
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+            .newInstance();
+        int nTrkPoints = 0;
+        FileInputStream fileInputStream = null;
+        try {
+            DocumentBuilder documentBuilder = documentBuilderFactory
+                .newDocumentBuilder();
+            fileInputStream = new FileInputStream(fileName);
+            Document document = documentBuilder.parse(fileInputStream);
+            Element elementRoot = document.getDocumentElement();
+
+            NodeList nodelist_trkpt = elementRoot.getElementsByTagName("trkpt");
+            String string = null;
+            Line line = new Line();
+            line.setDesc(fileName);
+            Point point;
+            for(int i = 0; i < nodelist_trkpt.getLength(); i++) {
+                nTrkPoints++;
+                Node node = nodelist_trkpt.item(i);
+                NamedNodeMap attributes = node.getAttributes();
+                string = attributes.getNamedItem("lat").getTextContent();
+                double lat = Double.parseDouble(string);
+                string = attributes.getNamedItem("lon").getTextContent();
+                double lon = Double.parseDouble(string);
+                point = mapCalibration.inverse(lon, lat);
+                line.addPoint(point);
+            }
+            if(line.getNPoints() == 0) {
+                SWTUtils.warnMsg("No points found");
+            }
+            addLine(line);
+            line = null;
+            ok = true;
+        } catch(ParserConfigurationException ex) {
+            SWTUtils.excMsg("Parser Configuration Error", ex);
+        } catch(FileNotFoundException ex) {
+            SWTUtils.errMsg("File not found: " + fileName);
+        } catch(SAXException ex) {
+            SWTUtils.excMsg("SAX Error", ex);
+        } catch(IOException ex) {
+            SWTUtils.excMsg("Error reading tract point " + nTrkPoints, ex);
+        } finally {
+            if(fileInputStream != null) {
+                fileInputStream.close();
+            }
+        }
+        return ok;
+    }
+
+    /**
      * Gives info about the current Lines.
      * 
      * @return
@@ -205,8 +278,8 @@ public class Lines
         Line line;
         for(int i = 0; i < this.getNLines(); i++) {
             line = lines.get(i);
-            info += "  Line " + i + " nPoints=" + line.getNPoints() + " "
-                + line + LS;
+            info += "  Line " + i + " nPoints=" + line.getNPoints() + " " + line
+                + LS;
         }
         return info;
     }

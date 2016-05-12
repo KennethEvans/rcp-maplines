@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Point;
+
 import net.kenevans.core.utils.SWTUtils;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
@@ -126,7 +128,7 @@ public class MapCalibration
             transform = new MapTransform(a, b, c, d, e, f);
             // DEBUG
             // System.out.println(String.format(
-            // "  a=%.3g b=%.3g c=%.3g d=%.3g e=%.3g f= %.3g",
+            // " a=%.3g b=%.3g c=%.3g d=%.3g e=%.3g f= %.3g",
             // transform.getA(), transform.getB(), transform.getC(),
             // transform.getD(), transform.getE(), transform.getF()));
         } catch(Exception ex) {
@@ -166,28 +168,28 @@ public class MapCalibration
             lon3 = dataList.get(2).getLon();
             lat3 = dataList.get(2).getLat();
 
-            double a = ((lon2 - lon1) * y3 + (lon1 - lon3) * y2 + (lon3 - lon2)
-                * y1)
+            double a = ((lon2 - lon1) * y3 + (lon1 - lon3) * y2
+                + (lon3 - lon2) * y1)
                 / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-            double b = -((lon2 - lon1) * x3 + (lon1 - lon3) * x2 + (lon3 - lon2)
-                * x1)
+            double b = -((lon2 - lon1) * x3 + (lon1 - lon3) * x2
+                + (lon3 - lon2) * x1)
                 / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-            double c = ((lat2 - lat1) * y3 + (lat1 - lat3) * y2 + (lat3 - lat2)
-                * y1)
+            double c = ((lat2 - lat1) * y3 + (lat1 - lat3) * y2
+                + (lat3 - lat2) * y1)
                 / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-            double d = -((lat2 - lat1) * x3 + (lat1 - lat3) * x2 + (lat3 - lat2)
-                * x1)
+            double d = -((lat2 - lat1) * x3 + (lat1 - lat3) * x2
+                + (lat3 - lat2) * x1)
                 / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-            double e = ((lon1 * x2 - lon2 * x1) * y3 + (lon3 * x1 - lon1 * x3)
-                * y2 + (lon2 * x3 - lon3 * x2) * y1)
+            double e = ((lon1 * x2 - lon2 * x1) * y3
+                + (lon3 * x1 - lon1 * x3) * y2 + (lon2 * x3 - lon3 * x2) * y1)
                 / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-            double f = ((lat1 * x2 - lat2 * x1) * y3 + (lat3 * x1 - lat1 * x3)
-                * y2 + (lat2 * x3 - lat3 * x2) * y1)
+            double f = ((lat1 * x2 - lat2 * x1) * y3
+                + (lat3 * x1 - lat1 * x3) * y2 + (lat2 * x3 - lat3 * x2) * y1)
                 / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
             transform = new MapTransform(a, b, c, d, e, f);
             // DEBUG
             // System.out.println(String.format(
-            // "  a=%.3g b=%.3g c=%.3g d=%.3g e=%.3g f= %.3g",
+            // " a=%.3g b=%.3g c=%.3g d=%.3g e=%.3g f= %.3g",
             // transform.getA(), transform.getB(), transform.getC(),
             // transform.getD(), transform.getE(), transform.getF()));
         } catch(Exception ex) {
@@ -211,31 +213,35 @@ public class MapCalibration
         val[0] = transform.getA() * x + transform.getB() * y + transform.getE();
         val[1] = transform.getC() * x + transform.getD() * y + transform.getF();
         // DEBUG
-        // System.out.println(String.format("x=%d y=%d lon=%.6f lat=%.6f", x, y,
-        // val[0], val[1]));
+        // System.out.println(
+        //           String.format("x=%d y=%d lon=%.6f lat=%.6f", x, y, val[0], val[1]));
         return val;
     }
 
-    public int[] inverse(double lon, double lat) {
+    public Point inverse(double lon, double lat) {
         if(transform == null) {
             return null;
         }
-        int[] val = new int[2];
-        double det = transform.getA() * transform.getD() - transform.getB()
-            * transform.getC();
+        double det = transform.getA() * transform.getD()
+            - transform.getB() * transform.getC();
         if(det == 0) {
             return null;
         }
+        // DEBUG
+        // System.out.printf("%10.6f %10.6f %10.6f %10.6f %10.6f %10.6f",
+        // transform.getA(), transform.getB(), transform.getC(),
+        // transform.getD(), transform.getE(), transform.getF());
         double v1, v2;
-        v1 = (transform.getD() * (lon - transform.getE()) - transform.getB()
-            * (lat - transform.getF()));
-        v2 = (transform.getA() * (lat - transform.getF()) - transform.getC()
-            * (lon - transform.getE()));
+        lon -= transform.getE();
+        lat -= transform.getF();
+        v1 = transform.getD() * lon - transform.getB() * lat;
+        v2 = transform.getA() * lat - transform.getC() * lon;
         v1 /= det;
         v2 /= det;
-        val[0] = (int)(v1 + .5);
-        val[1] = (int)(v2 + .5);
-        return val;
+        // DEBUG
+        // System.out.printf("%10.6f %10.6f %6d %6d" + SWTUtils.LS, lon, lat,
+        // (int)(v1 + .5), (int)(v2 + .5));
+        return new Point((int)(v1 + .5), (int)(v2 + .5));
     }
 
     /**

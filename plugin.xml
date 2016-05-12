@@ -125,6 +125,15 @@
                visible="true">
          </separator>
          <command
+               commandId="net.kenevans.maplines.linesfromgpx"
+               label="Lines from GPX..."
+               style="push">
+         </command>
+         <separator
+               name="separator4"
+               visible="true">
+         </separator>
+         <command
                commandId="net.kenevans.maplines.calibrationlines"
                label="Calibration Lines"
                style="push">
@@ -221,6 +230,11 @@
             categoryId="net.kenevans.maplines.category"
             id="net.kenevans.maplines.editlines"
             name="Edit Lines...">
+      </command>
+      <command
+            categoryId="net.kenevans.maplines.category"
+            id="net.kenevans.maplines.linesfromgpx"
+            name="Lines from GPX...">
       </command>
    </extension>
 
