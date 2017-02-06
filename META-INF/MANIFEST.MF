@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Map Lines
-Bundle-SymbolicName: net.kenevans.maplines; singleton:=true
+Bundle-SymbolicName: net.kenevans.rcp.maplines;singleton:=true
 Bundle-Version: 1.1.0.0
 Bundle-Activator: net.kenevans.maplines.plugin.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- net.kenevans.core.utils,
+ net.kenevans.rcp.core.utils,
  org.eclipse.equinox.ds
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
