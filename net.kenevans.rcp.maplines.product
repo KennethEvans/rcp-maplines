@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Map Lines" id="net.kenevans.maplines.product" application="net.kenevans.maplines.application" version="1.1.0.0" useFeatures="false" includeLaunchers="true">
-
+<product name="Map Lines" id="net.kenevans.rcp.maplines.product" application="net.kenevans.rcp.maplines.application" version="1.1.1.0-RCP" useFeatures="false" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
@@ -23,7 +22,6 @@
          <bmp/>
       </win>
    </launcher>
-
 
    <vm>
    </vm>
@@ -56,15 +54,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
    <plugins>
       <plugin id="com.ibm.icu"/>
       <plugin id="javax.inject"/>
-      <plugin id="javax.servlet"/>
       <plugin id="javax.xml"/>
-      <plugin id="net.kenevans.core.utils"/>
-      <plugin id="net.kenevans.maplines"/>
+      <plugin id="net.kenevans.rcp.core.utils"/>
+      <plugin id="net.kenevans.rcp.maplines"/>
       <plugin id="org.apache.batik.css"/>
       <plugin id="org.apache.batik.util"/>
       <plugin id="org.apache.batik.util.gui"/>
       <plugin id="org.apache.commons.jxpath"/>
-      <plugin id="org.eclipse.ant.core"/>
       <plugin id="org.eclipse.core.commands"/>
       <plugin id="org.eclipse.core.contenttype"/>
       <plugin id="org.eclipse.core.databinding"/>
@@ -77,7 +73,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       <plugin id="org.eclipse.core.resources"/>
       <plugin id="org.eclipse.core.resources.win32.x86" fragment="true"/>
       <plugin id="org.eclipse.core.runtime"/>
-      <plugin id="org.eclipse.core.variables"/>
       <plugin id="org.eclipse.e4.core.commands"/>
       <plugin id="org.eclipse.e4.core.contexts"/>
       <plugin id="org.eclipse.e4.core.di"/>
@@ -128,9 +123,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       <plugin id="org.eclipse.swt.win32.win32.x86" fragment="true"/>
       <plugin id="org.eclipse.text"/>
       <plugin id="org.eclipse.ui"/>
-      <plugin id="org.eclipse.ui.forms"/>
       <plugin id="org.eclipse.ui.ide"/>
-      <plugin id="org.eclipse.ui.views"/>
       <plugin id="org.eclipse.ui.win32" fragment="true"/>
       <plugin id="org.eclipse.ui.workbench"/>
       <plugin id="org.eclipse.wst.jsdt.nashorn.extension" fragment="true"/>

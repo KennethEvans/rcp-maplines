@@ -153,7 +153,7 @@
          id="product"
          point="org.eclipse.core.runtime.products">
       <product
-            application="net.kenevans.maplines.application"
+            application="net.kenevans.rcp.maplines.application"
             name="Map Lines">
          <property
                name="windowImages"

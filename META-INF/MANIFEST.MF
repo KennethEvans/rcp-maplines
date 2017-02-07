@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Map Lines
 Bundle-SymbolicName: net.kenevans.rcp.maplines;singleton:=true
-Bundle-Version: 1.1.0.0
+Bundle-Version: 1.1.1.0-RCP
 Bundle-Activator: net.kenevans.maplines.plugin.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  net.kenevans.rcp.core.utils,
- org.eclipse.equinox.ds
+ org.eclipse.equinox.ds,
+ org.eclipse.equinox.event
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: Jama-1.0.3.jar,
